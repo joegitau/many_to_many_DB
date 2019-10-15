@@ -76,6 +76,7 @@ CREATE DATABASE IF NOT EXISTS tv_review_app DEFAULT CHARACTER SET utf8;
 
 -- LEFT JOIN
 ------------
+-- JOIN SERIES with its respective REVIEW and include CASE OPTIONS
 SELECT  
   title, 
   IFNULL(AVG(rating), 0) AS avg_rating,
@@ -86,19 +87,41 @@ SELECT
   END AS stars
 FROM series
 LEFT JOIN reviews
-ON series.id = reviews.series_id
+  ON series.id = reviews.series_id
 GROUP BY series.id;
 
+-- fetch only un-REVIEWED SERIES
+SELECT 
+  title,
+  rating
+FROM series
+LEFT JOIN reviews
+  ON series.id != reviews.series_id
+WHERE rating IS NULL;
+
+-- REVIEWER stats
+SELECT 
+  first_name, last_name,
+  COUNT(rating) AS 'COUNT',
+  MIN(rating) AS 'MIN',
+  MAX(rating) AS 'MAX',
+  ROUND(AVG(rating), 2) AS 'AVG'
+FROM reviewers
+LEFT JOIN reviews
+  ON reviewers.id = reviews.reviewer_id
+GROUP BY reviewers.id;
+
+-------------
 -- INNER JOIN
 -------------
  -- JOIN SERIES with respective RATING
 SELECT 
   title, 
   rating,
-  AVG(rating) AS avg_rating
+  ROUND(AVG(rating), 2) AS avg_rating
 FROM series
-JOIN reviews
-ON series.id = reviews.series_id
+INNER JOIN reviews
+  ON series.id = reviews.series_id
 GROUP BY reviews.id
 ORDER BY avg_rating DESC;
 
@@ -108,7 +131,7 @@ SELECT
   first_name,
   AVG(rating) AS avg_rating
 FROM reviewers
-JOIN reviews
-ON reviewers.id = reviews.reviewer_id
+INNER JOIN reviews
+  ON reviewers.id = reviews.reviewer_id
 GROUP BY reviewers.id
 ORDER BY avg_rating DESC;
