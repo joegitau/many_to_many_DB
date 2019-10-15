@@ -103,9 +103,10 @@ WHERE rating IS NULL;
 SELECT 
   first_name, last_name,
   COUNT(rating) AS 'COUNT',
-  MIN(rating) AS 'MIN',
-  MAX(rating) AS 'MAX',
-  ROUND(AVG(rating), 2) AS 'AVG'
+  IFNULL(MIN(rating), 0) AS 'MIN',
+  IFNULL(MAX(rating), 0) AS 'MAX',
+  IFNULL(ROUND(AVG(rating), 2), 0) AS 'AVG',
+  IF(COUNT(rating) >= 1, 'ACTIVE', 'INACTIVE') AS 'STATUS'
 FROM reviewers
 LEFT JOIN reviews
   ON reviewers.id = reviews.reviewer_id
@@ -135,3 +136,15 @@ INNER JOIN reviews
   ON reviewers.id = reviews.reviewer_id
 GROUP BY reviewers.id
 ORDER BY avg_rating DESC;
+
+-- JOIN REVIEWS, SERIES & REVIEWERS
+SELECT 
+  title AS 'SERIES TITLE', 
+  rating AS 'SERIES RATING', 
+  CONCAT(first_name, ' ', last_name) AS REVIEWER
+FROM reviewers
+INNER JOIN reviews
+  ON reviewers.id = reviews.reviewer_id
+INNER JOIN series
+  ON series.id = reviews.series_id
+ORDER BY reviewer;
